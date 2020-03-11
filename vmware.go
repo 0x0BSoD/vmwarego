@@ -80,6 +80,17 @@ func NameFilter(c *govmomi.Client, nameFilter string) ([]mo.VirtualMachine, erro
 	return result, nil
 }
 
+func ServiceInfo(clientParameters ClientParams) (types.ServiceContent, error) {
+	ctx := context.Background()
+
+	c, err := NewClient(ctx, clientParameters)
+	if err != nil {
+		return types.ServiceContent{}, err
+	}
+
+	return c.ServiceContent, nil
+}
+
 func VMInfo(name string, clientParameters ClientParams) (types.VirtualMachineSummary, error) {
 	result := types.VirtualMachineSummary{}
 
