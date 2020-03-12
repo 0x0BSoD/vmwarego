@@ -1,7 +1,7 @@
 package vmWareGo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"testing"
 )
@@ -9,21 +9,18 @@ import (
 var cParams ClientParams
 
 func TestFindIP(t *testing.T) {
-
 	cParams = ClientParams{
-		URL: "URL",
+		URL:      "URL",
 		Insecure: true,
-		User: "USER",
+		User:     "USER",
 		Password: "PASS",
+		Ctx:      context.Background(),
 	}
 
-
-	vms, err := AllVMs(cParams)
+	vmC, err := NewClient(cParams)
 	if err != nil {
 		log.Println(err)
 	}
 
-	for _, i := range vms {
-		fmt.Println(i.Config.Annotation)
-	}
+	_ = PrettyPrint(vmC.Client.ServiceContent.About)
 }
