@@ -1,12 +1,28 @@
 package vmWareGo
 
 import (
-	"fmt"
+	"errors"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+func (vm *Vmware) VmRetrieve(targetVm []mo.VirtualMachine, fields []string) error {
+	manager := view.NewManager(vm.Client.Client)
+	containerView, err := manager.CreateContainerView(vm.Ctx, vm.Client.ServiceContent.RootFolder, []string{"VirtualMachine"}, true)
+	if err != nil {
+		return err
+	}
+	defer containerView.Destroy(vm.Ctx)
+
+	err = containerView.Retrieve(vm.Ctx, []string{"VirtualMachine"}, fields, &targetVm)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (vm *Vmware) VmsAllSummary() ([]types.VirtualMachineSummary, error) {
 	manager := view.NewManager(vm.Client.Client)
@@ -38,8 +54,9 @@ func (vm *Vmware) VmInfo(name string) (types.VirtualMachineSummary, error) {
 	if err != nil {
 		return types.VirtualMachineSummary{}, err
 	}
-	if vms[0].Summary.Guest.ToolsStatus == "toolsNotRunning" {
-		return types.VirtualMachineSummary{}, fmt.Errorf("tools not running vm name: %s", name)
+
+	if len(vms) > 1 {
+		return types.VirtualMachineSummary{}, errors.New("get more than one vm")
 	}
 
 	return vms[0].Summary, nil

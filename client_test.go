@@ -1,26 +1,44 @@
 package vmWareGo
 
 import (
-	"context"
-	"log"
+	"fmt"
 	"testing"
 )
 
-var cParams ClientParams
-
 func TestFindIP(t *testing.T) {
-	cParams = ClientParams{
-		URL:      "URL",
+	vmC, err := NewClient(ClientParams{
+		URL:      "https://HOST",
 		Insecure: true,
 		User:     "USER",
 		Password: "PASS",
 		Ctx:      context.Background(),
-	}
-
-	vmC, err := NewClient(cParams)
+	})
 	if err != nil {
-		log.Println(err)
+		t.Fatal(err)
 	}
 
-	_ = PrettyPrint(vmC.Client.ServiceContent.About)
+	vms, err := vmC.VmsFilter("base-w2k16-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type Tags struct {
+		Template string `json:"Template"`
+	}
+	var tags Tags
+
+	err = vmC.VmRetrieve(vms, []string{"summary"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, vm := range vms {
+		err = vmC.VmCustomFields(vm, &tags)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Printf("%s || Template => %s\n", vm.Summary.Config.Name, tags.Template)
+	}
+
+	vmC.Close()
 }

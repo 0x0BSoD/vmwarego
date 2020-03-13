@@ -26,6 +26,11 @@ type Vmware struct {
 func NewClient(clientParams ClientParams) (Vmware, error) {
 
 	// Parse URL from string
+	_, err := url.ParseRequestURI(clientParams.URL)
+	if err != nil {
+		return Vmware{}, err
+	}
+
 	u, err := soap.ParseURL(clientParams.URL)
 	if err != nil {
 		return Vmware{}, err
