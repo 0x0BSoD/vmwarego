@@ -2,6 +2,7 @@ package vmWareGo
 
 import (
 	"context"
+	"net/http"
 	"net/url"
 
 	"github.com/vmware/govmomi"
@@ -23,7 +24,7 @@ type Vmware struct {
 }
 
 // NewClient creates a govmomi.Client
-func NewClient(clientParams ClientParams) (Vmware, error) {
+func NewClient(clientParams ClientParams, customTransport *http.Transport) (Vmware, error) {
 
 	// Parse URL from string
 	_, err := url.ParseRequestURI(clientParams.URL)
@@ -45,6 +46,11 @@ func NewClient(clientParams ClientParams) (Vmware, error) {
 	if err != nil {
 		return Vmware{}, err
 	}
+
+	if customTransport != nil {
+		c.Client.Transport = customTransport
+	}
+
 	vm.Client = c
 	vm.Ctx = clientParams.Ctx
 

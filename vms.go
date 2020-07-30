@@ -59,6 +59,10 @@ func (vm *Vmware) VmInfo(name string) (types.VirtualMachineSummary, error) {
 		return types.VirtualMachineSummary{}, errors.New("get more than one vm")
 	}
 
+	if len(vms) < 1 {
+		return types.VirtualMachineSummary{}, errors.New("vm not found")
+	}
+
 	return vms[0].Summary, nil
 }
 
